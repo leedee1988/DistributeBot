@@ -686,7 +686,6 @@ class adminCog(commands.Cog):
 
 	################ guild_db초기화 ################
 	@is_manager()
-	@commands.has_permissions(manage_guild=True)
 	@commands.command(name=commandSetting[2][0], aliases=commandSetting[2][1:])
 	async def initialize_all_guild_data(self, ctx):
 		global basicSetting
