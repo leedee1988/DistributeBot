@@ -967,6 +967,7 @@ class memberCog(commands.Cog):
 		embed.add_field(name = f"**👤 혈원수**",value = f"**```fix\n{len(sorted_member_document)}```**")
 		embed.add_field(name = f"**🏦 잔고**",value = f"**```fix\n{total_account}```**")
 		embed.add_field(name = f"**💰 혈비**",value = f"**```fix\n{remain_guild_money}```**")
+		embed.add_field(name = f"**🤴 토탈**",value = f"**```cs\n{total_account+remain_guild_money}```**")
 		#embed.set_footer(text = f"👑 표시는 총무!")
 		return await ctx.send(embed = embed)
 
