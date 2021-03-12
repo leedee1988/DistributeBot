@@ -935,7 +935,7 @@ class memberCog(commands.Cog):
 
 		member_document : list = list(self.member_db.find({}))
 
-		sorted_member_document : dict = sorted(member_document, key=lambda member_document:member_document['game_ID'], reverse = True)
+		sorted_member_document : dict = sorted(member_document, key=lambda member_document:member_document['game_ID'], reverse = False)
 
 		total_account : int = sum(member['account'] for member in sorted_member_document)
 
