@@ -3775,12 +3775,16 @@ class bankCog(commands.Cog):
 		if jungsan_document["gulid_money_insert"]:
 			return await ctx.send(f"{ctx.author.mention}님! 해당 정산 내역은 **[ 혈비 ]**로 적립 예정입니다. **[ {commandSetting[24][0]} ]** 명령을 통해 정산해 주세요!")
 		
-		after_tax_price : int = int(input_sell_price_data[1]*(1-(basicSetting[7]/100)))
-		result_each_price : int = int(after_tax_price//len(jungsan_document["before_jungsan_ID"]))
+		after_tax_price : int = int(input_sell_price_data[1]*(1-(basicSetting[7]/100))) #세후 정산금
+		result_each_price : int = int(after_tax_price//len(jungsan_document["before_jungsan_ID"])) #개인 분배금
+		exchange_price : int = after_tax_price - (result_each_price*len(jungsan_document["before_jungsan_ID"])) #짤짤이
 
 		participant_list : list = jungsan_document["before_jungsan_ID"]
 
-		self.member_db.update_many({"game_ID":{"$in":participant_list}}, {"$inc":{"account":result_each_price}})
+		self.member_db.update_one({"_id":jungsan_document["toggle_ID"]}, {"$dec":{"account":after_tax_price}}) #토글자 계좌에서 세후 정산금 차감
+		self.member_db.update_many({"game_ID":{"$in":participant_list}}, {"$inc":{"account":result_each_price}}) #참여자 계좌에게 입금
+		self.member_db.update_many({"permissions":"manager"}, {"$inc":{"account":exchange_price}}) #토글자 계좌에서 짤짤이 입금
+		
 
 		insert_data : dict = {}
 		insert_data = {
