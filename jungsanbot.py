@@ -3775,7 +3775,7 @@ class bankCog(commands.Cog):
 		if jungsan_document["gulid_money_insert"]:
 			return await ctx.send(f"{ctx.author.mention}님! 해당 정산 내역은 **[ 혈비 ]**로 적립 예정입니다. **[ {commandSetting[24][0]} ]** 명령을 통해 정산해 주세요!")
 		
-		after_tax_price : int = int(input_sell_price_data[1]*(1-(basicSetting[7]/100))) #세후 정산금
+		after_tax_price : int = int(input_sell_price_data[1]) # 입력을 세후 정산금으로
 		result_each_price : int = int(after_tax_price//len(jungsan_document["before_jungsan_ID"])) #개인 분배금
 		exchange_price : int = after_tax_price - (result_each_price*len(jungsan_document["before_jungsan_ID"])) #짤짤이
 
@@ -3802,7 +3802,7 @@ class bankCog(commands.Cog):
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 			return await ctx.send(f"{ctx.author.mention}, 은행 저축 실패.")		
 
-		return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰판매금 **[ {after_tax_price} ]**(세율 {basicSetting[7]}% 적용)\n**{jungsan_document['before_jungsan_ID']}**계좌로 인당 **💰 [ {result_each_price} ]** 은행 저축 완료!")
+		return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰정산금 **[ {after_tax_price} ]**\n**{jungsan_document['before_jungsan_ID']}**계좌로 인당 **💰 [ {result_each_price} ]** 은행 저축 완료!")
 
 	################ 뽑기저축 ################ 
 	@commands.command(name=commandSetting[48][0], aliases=commandSetting[48][1:])
