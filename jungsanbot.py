@@ -3781,7 +3781,8 @@ class bankCog(commands.Cog):
 
 		participant_list : list = jungsan_document["before_jungsan_ID"]
 
-		self.member_db.update_one({"_id":int(jungsan_document["toggle_ID"])}, {"$inc":{"account":(after_tax_price * -1)}}) #토글자 계좌에서 세후 정산금 차감
+		if member_data['permissions'] != "manager": #총무가 저축하는게 아닐때, 토글자 계좌에서 세후 정산금 차감
+			self.member_db.update_one({"_id":int(jungsan_document["toggle_ID"])}, {"$inc":{"account":(after_tax_price * -1)}})
 		self.member_db.update_many({"game_ID":{"$in":participant_list}}, {"$inc":{"account":result_each_price}}) #참여자 계좌에게 입금
 		self.member_db.update_one({"permissions":"manager"}, {"$inc":{"account":exchange_price}}) #토글자 계좌에서 짤짤이 입금
 		
