@@ -557,6 +557,7 @@ class adminCog(commands.Cog):
 			member_command_list += f"{','.join(commandSetting[6])}\n"   # 혈원
 			member_command_list += f"{','.join(commandSetting[7])} [아이디]\n"   # 혈원등록
 			member_command_list += f"{','.join(commandSetting[8])} [아이디]\n\n"   # 혈원수정
+			member_command_list += f"{','.join(commandSetting[56])} [아이디]\n\n"   # 부주등록
 			
 			member_command_list += f"{','.join(commandSetting[28])}\n"   # 계좌
 			member_command_list += f"{','.join(commandSetting[44])} (아이템명)\n"   # 창고
@@ -945,7 +946,7 @@ class memberCog(commands.Cog):
 					manager_list += f"{member_info['game_ID']}({member_info['account']}) "
 				else:
 					manager_list += f"{member_info['game_ID']} "
-			else:
+			elif member_info["permissions"] == "member":
 				if member_info['account'] != 0:
 					member_list += f"{member_info['game_ID']}({member_info['account']}) "
 				else:
@@ -995,6 +996,39 @@ class memberCog(commands.Cog):
 		# "game_ID" : str = game_ID
 		# "discord_name" : str = discord_nickname
 		# "permissiotns" : str = 권한 ["manager", "member"]
+		# "account" : int = 은행잔고
+
+		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
+			return await ctx.send(f"{ctx.author.mention}, 혈원 등록 실패.")   
+
+		return await ctx.send(f"{ctx.author.mention}님! **[{args}] [{ctx.author.id}]**(으)로 혈원 등록 완료!")
+
+	################ 부주 등록 ################ 
+	@commands.command(name=commandSetting[56][0], aliases=commandSetting[56][1:])
+	async def submember_add(self, ctx, *, args : str = None):
+		if ctx.message.channel.id != int(basicSetting[6]) or basicSetting[6] == "":
+			return
+
+		if not args:
+			return await ctx.send(f"**{commandSetting[56][0]} [아이디]** 양식으로 추가 해주세요")
+
+		args += "부주"
+		
+		member_document : dict = self.member_db.find_one({ "_id":ctx.author.id})
+		member_game_ID_document : dict = self.member_db.find_one({ "game_ID":args})
+
+		if member_document:
+			return await ctx.send(f"```이미 등록되어 있습니다!```")
+
+		if member_game_ID_document:
+			return await ctx.send(f"```이미 등록된 [아이디]입니다!```")
+
+		result = self.member_db.update_one({"_id":ctx.author.id}, {"$set":{"game_ID":args, "discord_name":self.bot.get_user(ctx.author.id).display_name, "permissions":"submember", "account":0}}, upsert = True)
+
+		# "_id" : int = discord_ID
+		# "game_ID" : str = game_ID
+		# "discord_name" : str = discord_nickname
+		# "permissiotns" : str = 권한 ["manager", "member", "member"]
 		# "account" : int = 은행잔고
 
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
