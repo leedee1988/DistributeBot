@@ -3772,6 +3772,72 @@ class bankCog(commands.Cog):
 		embed.set_thumbnail(url = ctx.author.avatar_url)
 		return await ctx.send(embed = embed)
 
+	################ 저축취소 ################ 
+	@is_manager()
+	@commands.command(name=commandSetting[57][0], aliases=commandSetting[57][1:])
+	async def cancel_bank_save_money(self, ctx, *, args : str = None):
+		if ctx.message.channel.id != int(basicSetting[6]):
+			return
+
+		member_data : dict = self.member_db.find_one({"_id":ctx.author.id})
+
+		if not member_data:
+			return await ctx.send(f"{ctx.author.mention}님은 혈원으로 등록되어 있지 않습니다!")
+			
+		if not args:
+			return await ctx.send(f"**{commandSetting[57][0]} [순번] 양식으로 입력 해주세요")
+
+		input_number_data : list = args.split()
+		len_input_number_data = len(input_number_data)
+
+		if len_input_number_data != 1:
+			return await ctx.send(f"**{commandSetting[57][0]} [순번] [금액]** 양식으로 입력 해주세요")
+
+		try:
+			input_number_data[0] = int(input_number_data[0])
+		except ValueError:
+			return await ctx.send(f"**[순번]**은 숫자로 입력 해주세요")
+
+		if "manager" in member_data['permissions']:
+			jungsan_document : dict = self.jungsan_db.find_one({"$and" : [{"_id":int(input_number_data[0])}, {"itemstatus":"분배완료"}]})
+		else:
+			jungsan_document : dict = self.jungsan_db.find_one({"$and" : [{"$or":[{"toggle_ID" : str(ctx.author.id)}, {"regist_ID" : str(ctx.author.id)}]}, {"_id":int(input_number_data[0])}, {"itemstatus":"분배완료"}]})
+
+		if not jungsan_document:
+			return await ctx.send(f"{ctx.author.mention}님! 등록하신 정산 내역이 **[ 분배완료 ]** 중이 아니거나 없습니다. **[ {commandSetting[13][0]}/{commandSetting[16][0]} ]** 명령을 통해 확인해주세요")
+
+		if jungsan_document["gulid_money_insert"]:
+			return await ctx.send(f"{ctx.author.mention}님! 해당 정산 내역은 **[ 혈비 ]**로 적립 완료입니다. **[ {commandSetting[51][0]} ]** 명령을 통해 정산해 주세요!")
+
+		after_tax_price : int = int(jungsan_document["price"]) # 총 정산금
+		result_each_price : int = int(jungsan_document["each_price"] ) #개인 분배금
+		exchange_price : int = after_tax_price - (result_each_price*len(jungsan_document["after_jungsan_ID"])) #짤짤이
+
+		participant_list : list = jungsan_document["after_jungsan_ID"]
+
+		if member_data['permissions'] != "manager": #총무가 저축하는게 아닐때, 토글자 계좌에서 세후 정산금 차감
+			self.member_db.update_one({"_id":int(jungsan_document["toggle_ID"])}, {"$inc":{"account":after_tax_price}})
+		self.member_db.update_many({"game_ID":{"$in":participant_list}}, {"$inc":{"account":(result_each_price * -1)}}) #참여자 계좌에서 다시 차감
+		self.member_db.update_one({"permissions":"manager"}, {"$inc":{"account":(exchange_price * -1)}}) #짤짤이 다시 차감
+		
+
+		insert_data : dict = {}
+		insert_data = {
+					"itemstatus":"미판매",
+					"price":0,
+					"each_price":0,
+					"before_jungsan_ID":sorted(jungsan_document["after_jungsan_ID"]),
+					"after_jungsan_ID":[],
+					"modifydate":datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8])),
+					"bank_money_insert":False,
+					}
+
+		result = self.jungsan_db.update_one({"_id":input_number_data[0]}, {"$set":insert_data}, upsert = False)
+		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
+			return await ctx.send(f"{ctx.author.mention}, 은행 저축 실패.")		
+
+		return await ctx.send(f"**[ 순번 : {input_number_data[0]} ]**   💰정산금 **[ {after_tax_price} ]**\n**{jungsan_document['after_jungsan_ID']}**계좌에서 인당 **💰 [ {result_each_price} ]** 은행 차감 완료!")
+
 	################ 저축 ################ 
 	@commands.command(name=commandSetting[29][0], aliases=commandSetting[29][1:])
 	async def bank_save_money(self, ctx, *, args : str = None):
@@ -3841,6 +3907,8 @@ class bankCog(commands.Cog):
 	################ 뽑기저축 ################ 
 	@commands.command(name=commandSetting[48][0], aliases=commandSetting[48][1:])
 	async def bank_ladder_save_money(self, ctx, *, args : str = None):
+		return await ctx.send(f"현재 지원하지 않는 기능입니다.")
+
 		if ctx.message.channel.id != int(basicSetting[6]):
 			return
 
