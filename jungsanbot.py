@@ -556,7 +556,7 @@ class adminCog(commands.Cog):
 			member_command_list : str = ""
 			member_command_list += f"{','.join(commandSetting[6])}\n"   # 혈원
 			member_command_list += f"{','.join(commandSetting[7])} [아이디]\n"   # 혈원등록
-			member_command_list += f"{','.join(commandSetting[8])} [아이디]\n\n"   # 혈원수정
+			member_command_list += f"{','.join(commandSetting[8])} [아이디]\n"   # 혈원수정
 			member_command_list += f"{','.join(commandSetting[56])} [아이디]\n\n"   # 부주등록
 			
 			member_command_list += f"{','.join(commandSetting[28])}\n"   # 계좌
@@ -587,6 +587,7 @@ class adminCog(commands.Cog):
 			member_command_list += f"{','.join(commandSetting[51])} [순번]\n"   # 판매취소
 			member_command_list += f"{','.join(commandSetting[29])} [순번] [금액]\n"   # 저축
 			member_command_list += f"{','.join(commandSetting[48])} [순번] [금액] [뽑을인원]\n"   # 뽑기저축
+			member_command_list += f"{','.join(commandSetting[57])} [순번]\n"   # 저축취소
 			member_command_list += f"{','.join(commandSetting[25])} [순번] [아이디]\n"   # 정산
 			member_command_list += f"{','.join(commandSetting[26])} [순번] [아이디]\n"   # 정산취소
 			member_command_list += f"{','.join(commandSetting[27])}\n"   # 일괄정산1
@@ -3773,7 +3774,6 @@ class bankCog(commands.Cog):
 		return await ctx.send(embed = embed)
 
 	################ 저축취소 ################ 
-	@is_manager()
 	@commands.command(name=commandSetting[57][0], aliases=commandSetting[57][1:])
 	async def cancel_bank_save_money(self, ctx, *, args : str = None):
 		if ctx.message.channel.id != int(basicSetting[6]):
@@ -3836,7 +3836,7 @@ class bankCog(commands.Cog):
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 			return await ctx.send(f"{ctx.author.mention}, 은행 저축 실패.")		
 
-		return await ctx.send(f"**[ 순번 : {input_number_data[0]} ]**   💰정산금 **[ {after_tax_price} ]**\n**{jungsan_document['after_jungsan_ID']}**계좌에서 인당 **💰 [ {result_each_price} ]** 은행 차감 완료!")
+		return await ctx.send(f"**[ 순번 : {input_number_data[0]} ]**   💰정산금 **[ {after_tax_price} ]**\n**{jungsan_document['after_jungsan_ID']}**계좌에서 인당 **💰 [ {result_each_price} ]** 은행 차감, 저축취소 완료!")
 
 	################ 저축 ################ 
 	@commands.command(name=commandSetting[29][0], aliases=commandSetting[29][1:])
