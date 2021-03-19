@@ -3791,7 +3791,7 @@ class bankCog(commands.Cog):
 		len_input_number_data = len(input_number_data)
 
 		if len_input_number_data != 1:
-			return await ctx.send(f"**{commandSetting[57][0]} [순번] [금액]** 양식으로 입력 해주세요")
+			return await ctx.send(f"**{commandSetting[57][0]} [순번]** 양식으로 입력 해주세요")
 
 		try:
 			input_number_data[0] = int(input_number_data[0])
