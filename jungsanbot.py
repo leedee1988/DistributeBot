@@ -3183,11 +3183,16 @@ class manageCog(commands.Cog):
 		result_each_price = int(input_sell_price_data[1]//len(jungsan_data["before_jungsan_ID"]))   # 혈비일 경우 수수로 계산 입력 예정
 
 		if jungsan_data["gulid_money_insert"]:
-			after_tax_price : int = int(input_sell_price_data[1]*(1-(basicSetting[7]/100)))
+			after_tax_price : int = int(input_sell_price_data[1])
 			result_each_price : int = int(after_tax_price//len(jungsan_data["before_jungsan_ID"]))
 			result = self.jungsan_db.update_one({"_id":input_sell_price_data[0]}, {"$set":{"price":after_tax_price, "each_price":int(input_sell_price_data[1]), "modifydate":datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8])), "before_jungsan_ID":[], "after_jungsan_ID":sorted(jungsan_data["before_jungsan_ID"]), "itemstatus":"분배완료"}}, upsert = False)
 			if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 				return await ctx.send(f"{ctx.author.mention}, 혈비 등록 실패.")
+			toggle_member_data : dict = self.member_db.find_one({"_id":int(jungsan_data["toggle_ID"])})
+			if not toggle_member_data:
+				return await ctx.send(f"토글자의 계좌를 찾을 수 없습니다.")
+			if toggle_member_data['permissions'] != "manager": #토글자가 총무가 아닐때, 토글자 계좌에서 세후 정산금 차감
+				self.member_db.update_one({"_id":int(jungsan_data["toggle_ID"])}, {"$inc":{"account":(after_tax_price * -1)}})
 			result_guild = self.guild_db.update_one({"_id":"guild"}, {"$inc":{"guild_money":after_tax_price}}, upsert = True)
 			if result_guild.raw_result["nModified"] < 1 and "upserted" not in result_guild.raw_result:
 				return await ctx.send(f"{ctx.author.mention}, 혈비 적립 실패.")
@@ -3199,7 +3204,7 @@ class manageCog(commands.Cog):
 						"reason":f"[순번:{input_sell_price_data[0]}] - 정산금 혈비 적립"
 			}
 			result_guild_log = self.guild_db_log.insert_one(insert_log_data)
-			return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰판매금 **[ {after_tax_price} ]**(세율 {basicSetting[7]}% 적용) 혈비 적립 완료!")
+			return await ctx.send(f"**[ 순번 : {input_sell_price_data[0]} ]**   💰정산금 **[ {after_tax_price} ]** 혈비 적립 완료!")
 		
 		result = self.jungsan_db.update_one({"_id":input_sell_price_data[0]}, {"$set":{"price":input_sell_price_data[1], "each_price":result_each_price, "modifydate":datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8])), "itemstatus":"분배중"}}, upsert = False)
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
@@ -3351,6 +3356,11 @@ class manageCog(commands.Cog):
 				if str(reaction) == "⭕":
 					result = self.jungsan_db.update_one({"_id":input_distribute_finish_data[0]}, {"$set":{"price":0, "each_price":0, "modifydate":datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8])), "itemstatus":"미판매", "before_jungsan_ID":jungsan_data["after_jungsan_ID"],"after_jungsan_ID":[] }}, upsert = False)
 					result_guild = self.guild_db.update_one({"_id":"guild"}, {"$inc":{"guild_money":-jungsan_data["price"]}}, upsert = True)
+					toggle_member_data : dict = self.member_db.find_one({"_id":int(jungsan_data["toggle_ID"])})
+					if not toggle_member_data:
+						return await ctx.send(f"토글자의 계좌를 찾을 수 없습니다.")
+					if toggle_member_data['permissions'] != "manager": #토글자가 총무가 아닐때, 토글자 계좌에서 세후 정산금 다시 추가
+						self.member_db.update_one({"_id":int(jungsan_data["toggle_ID"])}, {"$inc":{"account":after_tax_price}})
 					if result_guild.raw_result["nModified"] < 1 and "upserted" not in result_guild.raw_result:
 						return await ctx.send(f"{ctx.author.mention}, 혈비 적립 실패.")
 					insert_log_data = {
@@ -3377,7 +3387,7 @@ class manageCog(commands.Cog):
 			jungsan_data : dict = self.jungsan_db.find_one({"$and" : [{"$or" : [{"toggle_ID" : str(ctx.author.id)}, {"regist_ID" : str(ctx.author.id)}]}, {"_id":int(input_distribute_finish_data[0])}, {"itemstatus":"분배중"}, {"after_jungsan_ID":[]}]})
 
 		if not jungsan_data:
-			return await ctx.send(f"{ctx.author.mention}님! 등록하신 정산 내역이 **[ 분배중 ]**이 아니거나 **[정산]**처리된 인원이 있거나 정산 목록에 없습니다. **[ {commandSetting[13][0]} ]** 명령을 통해 확인해주세요")
+			return await ctx.send(f"{ctx.author.mention}님! 등록하신 정산 내역이 **[ 분배중 ]**이 아니거나 **[정산]**처리된 인원이 있거나 정산 목록에 없습니다.\n 혈비등록건 취소는 총무만 가능합니다.\n**[ {commandSetting[13][0]} ]** 명령을 통해 확인해주세요")
 
 		embed = discord.Embed(
 				title = "📜 판매취소 정보",
