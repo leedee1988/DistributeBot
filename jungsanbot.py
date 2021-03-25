@@ -2224,11 +2224,18 @@ class manageCog(commands.Cog):
 		if not member_data:
 			return await ctx.send(f"{ctx.author.mention}님은 혈원으로 등록되어 있지 않습니다!")
 
+		if member_data['permissions'] == "submember":
+			ori_member_data : dict = self.member_db.find_one({"game_ID":member_data['game_ID'].replace("부주", "")})
+			if not ori_member_data:
+				return await ctx.send(member_data['game_ID'].replace("부주", "") + f"님은 혈원으로 등록되어 있지 않습니다!")
+			else:
+				member_data = ori_member_data
+
 		visual_flag : int = 0
 
 		jungsan_document : list = []
 		if not args:
-			jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(ctx.author.id)}))
+			jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(member_data['_id'])}))
 		else:
 			input_distribute_all_finish : list = args.split()
 			
@@ -2239,7 +2246,7 @@ class manageCog(commands.Cog):
 			len_input_distribute_all_finish = len(input_distribute_all_finish)
 
 			if len_input_distribute_all_finish == 0:
-				jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(ctx.author.id)}))
+				jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(member_data['_id'])}))
 			elif len_input_distribute_all_finish != 2:
 				return await ctx.send(f"**{commandSetting[16][0]} (상세) [검색조건] [검색값]** 형식으로 입력 해주세요! **[검색조건]**은 **[순번, 보스명, 아이템, 날짜, 분배상태]** 다섯가지 중 **1개**를 입력 하셔야합니다!")
 			else:
@@ -2248,7 +2255,7 @@ class manageCog(commands.Cog):
 						input_distribute_all_finish[1] = int(input_distribute_all_finish[1])
 					except:
 						return await ctx.send(f"**[순번] [검색값]**은 \"숫자\"로 입력 해주세요!")
-					jungsan_document : dict = self.jungsan_db.find_one({"toggle_ID":str(ctx.author.id), "_id":input_distribute_all_finish[1]})
+					jungsan_document : dict = self.jungsan_db.find_one({"toggle_ID":str(member_data['_id']), "_id":input_distribute_all_finish[1]})
 					if not jungsan_document:
 						return await ctx.send(f"{ctx.author.mention}님! 등록된 정산 목록이 없습니다.")
 					embed = get_detail_embed(jungsan_document)
@@ -2262,21 +2269,21 @@ class manageCog(commands.Cog):
 							return await ctx.send(f"{ctx.author.mention}, 정산 등록 실패.") 
 						return await ctx.send(embed = embed)
 				elif input_distribute_all_finish[0] == "보스명":
-					jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(ctx.author.id), "boss":input_distribute_all_finish[1]}))
+					jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(member_data['_id']), "boss":input_distribute_all_finish[1]}))
 				elif input_distribute_all_finish[0] == "아이템":
-					jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(ctx.author.id), "item":input_distribute_all_finish[1]}))
+					jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(member_data['_id']), "item":input_distribute_all_finish[1]}))
 				elif input_distribute_all_finish[0] == "날짜":
 					try:
 						start_search_date : str = (datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))).replace(year = int(input_distribute_all_finish[1][:4]), month = int(input_distribute_all_finish[1][5:7]), day = int(input_distribute_all_finish[1][8:10]), hour = 0, minute = 0, second = 0)
 						end_search_date : str = start_search_date + datetime.timedelta(days = 1)
 					except:
 						return await ctx.send(f"**[날짜] [검색값]**은 0000-00-00 형식으로 입력 해주세요!")
-					jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(ctx.author.id), "getdate":{"$gte":start_search_date, "$lt":end_search_date}}))
+					jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(member_data['_id']), "getdate":{"$gte":start_search_date, "$lt":end_search_date}}))
 				elif input_distribute_all_finish[0] == "분배상태":
 					if input_distribute_all_finish[1] == "분배중":
-						jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(ctx.author.id), "itemstatus" : "분배중"}))
+						jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(member_data['_id']), "itemstatus" : "분배중"}))
 					elif input_distribute_all_finish[1] == "미판매":
-						jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(ctx.author.id), "itemstatus" : "미판매"}))
+						jungsan_document : list = list(self.jungsan_db.find({"toggle_ID":str(member_data['_id']), "itemstatus" : "미판매"}))
 					else:
 						return await ctx.send(f"**[분배상태] [검색값]**은 \"미판매\" 혹은 \"분배중\"로 입력 해주세요!")
 				else:
