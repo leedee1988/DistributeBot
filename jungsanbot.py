@@ -3907,7 +3907,7 @@ class bankCog(commands.Cog):
 			return await ctx.send(f"토글자의 계좌를 찾을 수 없습니다.")
 
         if toggle_member_data['permissions'] != "manager": #토글자가 총무가 아닐때, 토글자 계좌에서 세후 정산금 차감
-            if int(toggle_member_data['account']) - after_tax_price <= -3000:
+            #if int(toggle_member_data['account']) - after_tax_price <= -3000:
                 return await ctx.send(f"저축 후 잔액이 -3000 이하로 떨어집니다.\n총무에게 입금 후 진행하세요.")
 
 		if toggle_member_data['permissions'] != "manager": #토글자가 총무가 아닐때, 토글자 계좌에서 세후 정산금 차감
