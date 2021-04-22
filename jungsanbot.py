@@ -229,7 +229,7 @@ class IlsangDistributionBot(commands.AutoShardedBot):
 		await self.wait_until_ready()
 		if basicSetting[6] != "" and basicSetting[6] != 0 :
 			backup_date = datetime.datetime.now() - datetime.timedelta(days = int(basicSetting[4])) + datetime.timedelta(hours = int(basicSetting[8]))
-			log_delete_date = datetime.datetime.now() - datetime.timedelta(days = int(30))
+			log_delete_date = datetime.datetime.now() - datetime.timedelta(days = int(basicSetting[4]))
 			
 			jungsan_document :list = []
 			delete_jungsan_id : list = []
@@ -1095,6 +1095,12 @@ class memberCog(commands.Cog):
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 			return await ctx.send(f"{ctx.author.mention}, 아이디 수정 실패.")   
 
+		submember_data : dict = self.member_db.find_one({"$and" : [{ "game_ID":member_data["game_ID"]+"부주"}, {"permissions":"submember"}]})
+		if submember_data:
+			result = self.member_db.update_one({"_id":submember_data["_id"]}, {"$set":{"game_ID":args+"부주"}}, upsert = True)
+			if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
+				return await ctx.send(f"{ctx.author.mention}, 부주아이디 수정 실패.")   
+
 		return await ctx.send(f"{ctx.author.mention}님, 아이디를 **[{member_data['game_ID']}]**에서 **[{args}]**로 변경하였습니다.")
 
 	################ 혈원아이디 정보 ################ 
@@ -1218,6 +1224,12 @@ class memberCog(commands.Cog):
 		result = self.member_db.update_one({"_id":int(input_regist_data[1])}, {"$set":{"game_ID":input_regist_data[0]}}, upsert = True)
 		if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
 			return await ctx.send(f"{ctx.author.mention}, {member_data['game_ID']}님 아이디 변경 실패.")   
+
+		submember_data : dict = self.member_db.find_one({"$and" : [{ "game_ID":member_data["game_ID"]+"부주"}, {"permissions":"submember"}]})
+		if submember_data:
+			result = self.member_db.update_one({"_id":submember_data["_id"]}, {"$set":{"game_ID":args+"부주"}}, upsert = True)
+			if result.raw_result["nModified"] < 1 and "upserted" not in result.raw_result:
+				return await ctx.send(f"{ctx.author.mention}, 부주아이디 수정 실패.")   
 
 		return await ctx.send(f"{ctx.author.mention}님, **{member_data['game_ID']}**님 아이디를 **[{input_regist_data[0]}]**로 변경하였습니다.")
 
