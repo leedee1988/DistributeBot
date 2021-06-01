@@ -3852,7 +3852,7 @@ class bankCog(commands.Cog):
 			self.member_db.update_one({"_id":int(jungsan_document["toggle_ID"])}, {"$inc":{"account":after_tax_price}})
 		self.member_db.update_many({"game_ID":{"$in":participant_list}}, {"$inc":{"account":(result_each_price * -1)}}) #참여자 계좌에서 다시 차감
 
-		if int(input_sell_price_data[0]) < 1200 :
+		if int(input_number_data[0]) < 1200 :
 			self.member_db.update_one({"permissions":"manager"}, {"$inc":{"account":(exchange_price * -1)}}) #짤짤이 다시 차감
 		else :
 			self.guild_db.update_one({"_id":"guild"}, {"$inc":{"guild_money":(exchange_price * -1)}}, upsert = False)
