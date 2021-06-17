@@ -939,19 +939,30 @@ class memberCog(commands.Cog):
 
 		sorted_member_document : dict = sorted(member_document, key=lambda member_document:member_document['game_ID'], reverse = False)
 
-		total_account : int = sum(member['account'] for member in sorted_member_document)
+		#total_account : int = sum(member['account'] for member in sorted_member_document)
 
+		total_account : int = 0
+		myguild_account : int = 0
+		union_account : int = 0
 		for member_info in sorted_member_document:
 			if member_info["permissions"] == "manager":
 				if member_info['account'] != 0:
 					manager_list += f"{member_info['game_ID']}({member_info['account']}) "
+					total_account += int(member_info['account'])
 				else:
 					manager_list += f"{member_info['game_ID']} "
 			elif member_info["permissions"] == "member":
 				if member_info['account'] != 0:
 					member_list += f"{member_info['game_ID']}({member_info['account']}) "
+					total_account += int(member_info['account'])
 				else:
 					member_list += f"{member_info['game_ID']} "
+			elif member_info["permissions"] == "guild":
+				if member_info['account'] != 0:
+					myguild_account += int(member_info['account'])
+			elif member_info["permissions"] == "union":
+				if member_info['account'] != 0:
+					union_account += int(member_info['account'])
 
 		embed = discord.Embed(
 		title = "👥  혈원 목록",
@@ -968,8 +979,12 @@ class memberCog(commands.Cog):
 			embed.add_field(name = f"**🧑 혈원**",value = f"**```cs\n{member_list}```**", inline = False)
 		embed.add_field(name = f"**👤 혈원수**",value = f"**```fix\n{len(sorted_member_document)}```**")
 		embed.add_field(name = f"**🏦 잔고**",value = f"**```fix\n{total_account}```**")
-		embed.add_field(name = f"**💰 혈비**",value = f"**```fix\n{remain_guild_money}```**")
-		embed.add_field(name = f"**💰 토탈**",value = f"**```cs\n{total_account+remain_guild_money}```**")
+		embed.add_field(name = f"**💰 혈비**",value = f"**```fix\n{remain_guild_money}```**", inline = False)
+
+		embed.add_field(name = f"**💰 블랙**",value = f"**```fix\n{myguild_account}```**")
+		embed.add_field(name = f"**💰 연합**",value = f"**```fix\n{union_account}```**", inline = False)
+		
+		embed.add_field(name = f"**💰 토탈**",value = f"**```cs\n{total_account+remain_guild_money+myguild_account+union_account}```**")
 		#embed.set_footer(text = f"👑 표시는 총무!")
 		return await ctx.send(embed = embed)
 
