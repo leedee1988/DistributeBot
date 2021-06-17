@@ -981,7 +981,7 @@ class memberCog(commands.Cog):
 		embed.add_field(name = f"**🏦 잔고**",value = f"**```fix\n{total_account}```**")
 		embed.add_field(name = f"**💰 혈비**",value = f"**```fix\n{remain_guild_money}```**")
 
-		embed.add_field(name = f"**💰 블랙**",value = f"**```fix\n{myguild_account}```**", inline = False)
+		embed.add_field(name = f"**💰 블랙**",value = f"**```fix\n{myguild_account}```**")
 		embed.add_field(name = f"**💰 연합**",value = f"**```fix\n{union_account}```**")
 		
 		embed.add_field(name = f"**💰 토탈**",value = f"**```cs\n{total_account+remain_guild_money+myguild_account+union_account}```**")
