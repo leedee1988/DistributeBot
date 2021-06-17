@@ -934,6 +934,8 @@ class memberCog(commands.Cog):
 			
 		member_list : str = ""
 		manager_list : str = ""
+		myguild_list : str = ""
+		union_list : str = ""
 
 		member_document : list = list(self.member_db.find({}))
 
@@ -959,10 +961,16 @@ class memberCog(commands.Cog):
 					member_list += f"{member_info['game_ID']} "
 			elif member_info["permissions"] == "guild":
 				if member_info['account'] != 0:
+					myguild_list += f"{member_info['game_ID']}({member_info['account']}) "
 					myguild_account += int(member_info['account'])
+				else:
+					myguild_list += f"{member_info['game_ID']} "
 			elif member_info["permissions"] == "union":
 				if member_info['account'] != 0:
+					union_list += f"{member_info['game_ID']}({member_info['account']}) "
 					union_account += int(member_info['account'])
+				else:
+					union_list += f"{member_info['game_ID']} "
 
 		embed = discord.Embed(
 		title = "👥  혈원 목록",
@@ -981,8 +989,8 @@ class memberCog(commands.Cog):
 		embed.add_field(name = f"**🏦 잔고**",value = f"**```fix\n{total_account}```**")
 		embed.add_field(name = f"**💰 블랙+하나 짤짤이**",value = f"**```fix\n{remain_guild_money}```**")
 
-		embed.add_field(name = f"**💰 블랙**",value = f"**```fix\n{myguild_account}```**")
-		embed.add_field(name = f"**💰 연합**",value = f"**```fix\n{union_account}```**")
+		embed.add_field(name = f"**💰 블랙**",value = f"**```fix\n{myguild_list}```**")
+		embed.add_field(name = f"**💰 연합**",value = f"**```fix\n{union_list}```**")
 		
 		embed.add_field(name = f"**💰 토탈**",value = f"**```cs\n{total_account+remain_guild_money+myguild_account+union_account}```**", inline = False)
 		#embed.set_footer(text = f"👑 표시는 총무!")
