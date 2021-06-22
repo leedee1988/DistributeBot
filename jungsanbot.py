@@ -1564,7 +1564,7 @@ class manageCog(commands.Cog):
 		for item_data in items_list:
 			self.index_value += 1
 			
-			input_time : datetime = datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[9]))
+			input_time : datetime = datetime.datetime.now() + datetime.timedelta(hours = int(basicSetting[8]))
 			insert_data : dict = {}
 			insert_data = {"_id":self.index_value,
 						"regist_ID":str(ctx.author.id),
