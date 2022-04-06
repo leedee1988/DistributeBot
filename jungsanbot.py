@@ -1149,6 +1149,8 @@ class memberCog(commands.Cog):
 		embed.add_field(name = "디스코드 🆔", value = f"```fix\n{member_data['_id']}```", inline=False)
 		if member_data['permissions'] == "manager":
 			embed.add_field(name = "💪 권한", value = f"```fix\n총무```")
+		elif member_data['permissions'] == "submember":
+			embed.add_field(name = "💪 권한", value = f"```fix\n부주```")
 		else:
 			embed.add_field(name = "💪 권한", value = f"```fix\n혈원```")
 		embed.add_field(name = "🏦 잔고", value = f"```fix\n{member_data['account']}```")
